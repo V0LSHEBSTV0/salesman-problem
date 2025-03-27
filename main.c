@@ -3,6 +3,7 @@
 #include <ctype.h>
 #include <string.h>
 #include <stdbool.h>
+#include "DoubleTree.h"
 
 
 #define INF 1e9
@@ -257,6 +258,16 @@ int main() {
     printf("Путь: ");
     print_cycle(path_eager, g->N);
     printf("\n\n");
+
+    CDoubleTreeHandle dt = createDoubleTree(g->G, g->N);
+    callAlgPrima(dt);
+    callFleri(dt);
+
+    int* path_dabltree = getCycle(dt, &g->N);
+    printf("Алгоритм даблтрии.\nПуть: ");
+    print_cycle(path_dabltree, g->N);
+
+    printf("\nМинимальная дистанция: %d\n", getSum(dt));
 
 
     // clean up
