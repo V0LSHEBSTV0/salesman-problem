@@ -222,7 +222,6 @@ int* eager_tsp(Graph* g) {
     return path;
 }
 
-
 void print_cycle(int* path, int n)
 {
     for (int i = 0; i < n - 1; i++)
