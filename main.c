@@ -3,13 +3,18 @@
 #include <ctype.h>
 #include <string.h>
 
+
+#define DOT 46 
+
+typedef float cost;
+
 typedef struct Graph {
     int N;
-    int** G;
+    cost** G;
 } Graph;
 
 
-int get_num(FILE *fp){
+cost get_num(FILE *fp){
     /*
         Returns NUll, no more digits in file
     */
@@ -23,11 +28,12 @@ int get_num(FILE *fp){
         return 0;
     do {
         word[i++] = ch;
-    } while(EOF != (ch = fgetc(fp)) && isdigit(ch));
+    } while(EOF != (ch = fgetc(fp)) && (isdigit(ch) || ch == DOT));
 
     word[i] = '\0';
-    int num;         
-    sscanf(strdup(word), "%d", &num);
+
+    cost num;         
+    sscanf(strdup(word), "%f", &num);
 
     return num;
 }
@@ -44,15 +50,15 @@ Graph* read_from_file(char* file)
     int vertex = get_num(fptr);
     
     // init array
-    int** arr; 
-    arr = (int**)malloc(vertex * sizeof(int*));
+    cost** arr; 
+    arr = (cost**)malloc(vertex * sizeof(cost*));
     for (int i = 0; i < vertex; i++)
-        arr[i] = (int*)malloc(vertex * sizeof(int));
+        arr[i] = (cost*)malloc(vertex * sizeof(cost));
 
     // read array
-    arr = (int**)malloc(vertex * sizeof(int*));
+    arr = (cost**)malloc(vertex * sizeof(cost*));
     for (int i = 0; i < vertex; i++)
-        arr[i] = (int*)malloc(vertex * sizeof(int));
+        arr[i] = (cost*)malloc(vertex * sizeof(cost));
 
     // read array
     for (int i = 0; i < vertex; i++) {
@@ -66,10 +72,10 @@ Graph* read_from_file(char* file)
     return &(Graph){vertex, arr};
 }
 
-void print_graph(int **arr, int rows, int cols) {
+void print_graph(cost **arr, int rows, int cols) {
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
-            printf("%d ", arr[i][j]);
+            printf("%f ", arr[i][j]);
         }
         printf("\n");
     }
