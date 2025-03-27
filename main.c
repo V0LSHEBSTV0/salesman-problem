@@ -15,7 +15,6 @@ typedef struct Graph {
     weight** G;
 } Graph;
 
-
 weight get_num(FILE *fp){
     /*
         Returns NUll, no more digits in file
@@ -174,6 +173,56 @@ int* naive_brute_force(Graph* g)
     return min_vertices;
 }
 
+int* eager_tsp(Graph* g) {
+    int N = g->N;           // Number of vertices
+    weight** G = g->G;      // Adjacency matrix
+
+    // Initialize visited array and path
+    bool* visited = (bool*)malloc(N * sizeof(bool));
+    int* path = (int*)malloc(N * sizeof(int));
+    for (int i = 0; i < N; i++) {
+        visited[i] = false;
+    }
+
+    // Start from vertex 0
+    int current = 0;
+    visited[current] = true;
+    path[0] = current;
+    weight total_weight = 0;
+
+    // Visit all vertices
+    for (int step = 1; step < N; step++) {
+        int next = -1;
+        weight min_weight = INF;  // INF is a large value (e.g., 1e9)
+        // Find the nearest unvisited vertex
+        for (int i = 0; i < N; i++) {
+            if (!visited[i] && G[current][i] < min_weight) {
+                min_weight = G[current][i];
+                next = i;
+            }
+        }
+        if (next == -1) {
+            printf("No path found\n");
+            free(visited);
+            free(path);
+            return NULL;
+        }
+        // Move to the nearest vertex
+        path[step] = next;
+        total_weight += min_weight;
+        visited[next] = true;
+        current = next;
+    }
+
+    // Return to the starting vertex
+    total_weight += G[current][path[0]];
+
+    // Clean up
+    free(visited);
+    return path;
+}
+
+
 void print_cycle(int* path, int n)
 {
     for (int i = 0; i < n - 1; i++)
@@ -193,12 +242,26 @@ int main() {
     //     return -1;
     // }
 
-    int* path = naive_brute_force(g);
-    weight dist = sum_of_cycle(g, path);
-    printf("Минимальная дистанция: %d\n", dist);
+    int* path_naive = naive_brute_force(g);
+    weight dist_naive = sum_of_cycle(g, path_naive);
+    printf("Полный перебор.\n");
+    printf("Минимальная дистанция: %d\n", dist_naive);
     printf("Путь: ");
-    print_cycle(path, g->N);
-    printf("\n");
+    print_cycle(path_naive, g->N);
+    printf("\n\n");
 
+
+    int* path_eager = eager_tsp(g);
+    weight dist_eager = sum_of_cycle(g, path_eager);
+    printf("Жадный алгоритм.\n");
+    printf("Минимальная дистанция: %d\n", dist_eager);
+    printf("Путь: ");
+    print_cycle(path_eager, g->N);
+    printf("\n\n");
+
+
+    // clean up
+    free(path_eager);
+    free(path_naive);
     return 0;
 }
