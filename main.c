@@ -89,8 +89,13 @@ bool is_euclidean_graph(Graph* g) {
         for (int j = 0; j < g->N; j++) {
             for (int k = 0; k < g->N; k++)
             {
+
                 if (g->G[i][j] > g->G[i][k] + g->G[j][k])
+                {
+                    // printf("%d, %d, %d\n", i, j, k);
+                    // printf("%d, %d, %d\n", g->G[i][j], g->G[i][k], g->G[j][k] );
                     return false;
+                }
             }
         }
     }
@@ -229,17 +234,16 @@ void print_cycle(int* path, int n)
     printf("%d -> %d", path[n-1], path[0]);
 }
 
-int main() {
-    
+int main() {    
     char input_file[] = "input.txt";
     Graph* g = read_from_file(input_file);
     
     print_graph(g->G, g->N, g->N);
-    // if (!is_euclidean_graph(g))
-    // {
-    //     printf("Граф не евклидов");
-    //     return -1;
-    // }
+    if (!is_euclidean_graph(g))
+    {
+        printf("Граф не евклидов\n");
+        return -1;
+    }
 
     int* path_naive = naive_brute_force(g);
     weight dist_naive = sum_of_cycle(g, path_naive);
@@ -257,7 +261,6 @@ int main() {
     printf("Путь: ");
     print_cycle(path_eager, g->N);
     printf("\n\n");
-
 
     // clean up
     free(path_eager);
