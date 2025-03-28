@@ -316,10 +316,10 @@ void limit_of_runtime(int* (*func)(Graph*))
 }
 
 int main() {
-    srand(time(NULL));
+    // srand(time(NULL));
 
-    printf("Полный перебор:\n");
-    limit_of_runtime(&naive_brute_force);
+    // printf("Полный перебор:\n");
+    // limit_of_runtime(&naive_brute_force);
 
     
     // char input_file[] = "input.txt";
@@ -355,15 +355,11 @@ int main() {
     // print_cycle(path_eager, g->N);
     // printf("\n\n");
 
-    CDoubleTreeHandle dt = createDoubleTree(g->G, g->N);
-    callAlgPrima(dt);
-    callFleri(dt);
-
-    int* path_dabltree = getCycle(dt, &g->N);
+    
+    int* path_dabltree = getCycleDoubleTree(g->G, &g->N);
     printf("Алгоритм даблтрии.\nПуть: ");
     print_cycle(path_dabltree, g->N);
 
-    printf("\nМинимальная дистанция: %d\n", getSum(dt));
 
     // // clean up
     // free(path_eager);

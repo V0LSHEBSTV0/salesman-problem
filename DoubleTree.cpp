@@ -1,6 +1,7 @@
 ﻿#include <iostream>
 #include <vector>
 #include <stack>
+#include <limits>
 
 // Добавил для конекта с мейном си
 #include <algorithm>  
@@ -160,7 +161,11 @@ public:
         
     }
 
-    std::vector<int> getCycle() {
+    std::vector<int> getCycle(){
+
+        AlgPrima();
+        Fleri();
+
         return cicEul;
     }
 
@@ -173,25 +178,25 @@ public:
 };
 
 extern "C" {
-    DoubleTree* createDoubleTree(float** graph, int n) {
+    // void callAlgPrima(DoubleTree* dt) { dt->AlgPrima(); } //функция из С вызывает метод с++
+    // void callFleri(DoubleTree* dt) { dt->Fleri(); } // 
+
+    int* getCycleDoubleTree(float** graph,  int* n_) {
+        int n = *n_;
         std::vector<std::vector<float>> graphVec(n, std::vector<float>(n)); //граф из си переводится в вектор
         for (int i = 0; i < n; ++i)
             for (int j = 0; j < n; ++j)
                 graphVec[i][j] = graph[i][j];
-        return new DoubleTree(graphVec, n);
-    }
+        
+        DoubleTree* dt = new DoubleTree(graphVec, n);
 
-    void callAlgPrima(DoubleTree* dt) { dt->AlgPrima(); } //функция из С вызывает метод с++
-    void callFleri(DoubleTree* dt) { dt->Fleri(); } // 
-
-    int* getCycle(DoubleTree* dt, int* out_size) {
         auto cycle = dt->getCycle();
-        *out_size = cycle.size();
+        // *out_size = cycle.size();
         int* arr = new int[cycle.size()];
-        std::copy(cycle.begin(), cycle.end(), arr); // копирование вектора из с++ в массив
+        std::copy(cycle.begin(), cycle.end(), arr);
+
+        std::cout << "Минимальная дистанция у даблтри: \n" << dt->getsum() << std::endl;
+        delete dt; 
         return arr;
     }
-
-    int getSum(DoubleTree* dt) { return dt->getsum(); }
-    void freeDoubleTree(DoubleTree* dt) { delete dt; }
 }
