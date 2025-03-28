@@ -1,2 +1,4 @@
-.vscode/*
 main
+main.o
+DoubleTree.o
+temp.json

@@ -6,7 +6,7 @@
 // Добавил для конекта с мейном си
 #include <algorithm>  
 #include <climits>   
-
+#include <limits>
 
 class DoubleTree {
 private:

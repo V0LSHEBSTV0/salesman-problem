@@ -281,15 +281,30 @@ Graph* get_random_euclidean_graph(int n)
     return graph;
 }
 
-
-double_t time_of_alg_runtime(int* (*func)(Graph*), Graph* g)
+double_t time_of_c_algs_runtime(int* (*func)(Graph*), Graph* g)
 {
+    /* measures time_in miliseconds */
+    
     clock_t begin;
     clock_t end;
     begin = clock();
     func(g);
     end = clock();
-    double_t delta = (double_t)(end - begin) / CLOCKS_PER_SEC;;
+    double_t delta = (double_t)(end - begin) / (CLOCKS_PER_SEC / 1000);
+    return delta;
+}
+
+
+double_t time_of_cpp_algs_runtime(int* (*func)(weight**, int n), Graph* g)
+{
+    /* measures time_in miliseconds */
+    
+    clock_t begin;
+    clock_t end;
+    begin = clock();
+    func(g->G, g->N);
+    end = clock();
+    double_t delta = (double_t)(end - begin) / (CLOCKS_PER_SEC / 1000);
     return delta;
 }
 
@@ -303,14 +318,13 @@ void limit_of_runtime(int* (*func)(Graph*))
     {
         g = get_random_euclidean_graph(n);   
         
-        
-        delta = time_of_alg_runtime(func, g);
+        delta = time_of_c_algs_runtime(func, g);
         n += 1;
 
         free(g->G);
         free(g);
         printf("Число врешин: %d, Время(с): %f\n", n, delta);
-    } while ( (delta < 180.0));
+    } while ( (delta < 180000.0));
 
     return;
 }
@@ -364,5 +378,7 @@ int main() {
     // // clean up
     // free(path_eager);
     // free(path_naive);
+
+    // free()
     return 0;
 }

@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "name": "Launch Program",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceRoot}/program",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal",
+            "stopAtEntry": false,
+            "MIMode": "gdb"
+        }
+    ]
+}
