@@ -447,31 +447,97 @@ void AlgPrima(DoubleTree* dt) {
     free(visited);
 }
 
-// Compute Eulerian cycle using Fleury's algorithm and shortcut it
+// // Compute Eulerian cycle using Fleury's algorithm and shortcut it
+// void Fleri(DoubleTree* dt) {
+//     int n = dt->n;
+//     int** ost = dt->ost;
+//     int stack[MAX_CYCLE];
+//     int top = -1;
+//     int start = findStart(ost, n);
+//     stack[++top] = start;
+
+//     while (top >= 0) {
+//         int v = stack[top];
+//         int found = 0;
+
+//         for (int i = 0; i < n; i++) {
+//             if (ost[v][i] > 0) {
+//                 int degree = 0;
+//                 for (int j = 0; j < n; j++) {
+//                     if (ost[v][j] > 0) degree++;
+//                 }
+
+//                 if (degree > 1 && checkBrig(v, i, ost, n)) continue;
+
+//                 stack[++top] = i;
+//                 ost[v][i]--;
+//                 ost[i][v]--;
+//                 found = 1;
+//                 break;
+//             }
+//         }
+
+//         if (!found) {
+//             if (dt->cicEul_size < MAX_CYCLE) {
+//                 dt->cicEul[dt->cicEul_size++] = v;
+//             }
+//             top--;
+//         }
+//     }
+
+//     // Remove duplicates, keeping first occurrence
+//     int write_idx = 0;
+//     int* seen = (int*)calloc(n, sizeof(int));
+//     for (int i = 0; i < dt->cicEul_size; i++) {
+//         int v = dt->cicEul[i];
+//         if (!seen[v]) {
+//             dt->cicEul[write_idx++] = v;
+//             seen[v] = 1;
+//         }
+//     }
+//     dt->cicEul_size = write_idx;
+//     free(seen);
+
+//     // Add 0 at the end to close the cycle
+//     if (dt->cicEul_size < MAX_CYCLE) {
+//         dt->cicEul[dt->cicEul_size++] = 0;
+//     }
+
+//     // Compute sumPath
+//     dt->sumPath = 0;
+//     for (int i = 0; i < dt->cicEul_size - 1; i++) {
+//         int u = dt->cicEul[i];
+//         int v = dt->cicEul[i + 1];
+//         dt->sumPath += dt->graph[u][v];
+//     }
+// }
+
+// Compute Eulerian cycle and shortcut it in O(n^2)
 void Fleri(DoubleTree* dt) {
     int n = dt->n;
     int** ost = dt->ost;
+    float** graph = dt->graph;
     int stack[MAX_CYCLE];
     int top = -1;
-    int start = findStart(ost, n);
+    int* visited_edges = (int*)calloc(n * n, sizeof(int)); // Track visited edges
+    int start = 0; // Start from vertex 0 (all degrees even in doubled MST)
+
+    // Push starting vertex
     stack[++top] = start;
 
     while (top >= 0) {
         int v = stack[top];
         int found = 0;
 
+        // Find the next unvisited edge
         for (int i = 0; i < n; i++) {
-            if (ost[v][i] > 0) {
-                int degree = 0;
-                for (int j = 0; j < n; j++) {
-                    if (ost[v][j] > 0) degree++;
-                }
-
-                if (degree > 1 && checkBrig(v, i, ost, n)) continue;
-
+            int edge_idx = v * n + i;
+            if (ost[v][i] > 0 && !visited_edges[edge_idx]) {
                 stack[++top] = i;
                 ost[v][i]--;
                 ost[i][v]--;
+                visited_edges[edge_idx] = 1;
+                visited_edges[i * n + v] = 1; // Mark symmetric edge
                 found = 1;
                 break;
             }
@@ -485,9 +551,11 @@ void Fleri(DoubleTree* dt) {
         }
     }
 
-    // Remove duplicates, keeping first occurrence
-    int write_idx = 0;
+    free(visited_edges);
+
+    // Remove duplicates in-place, keeping first occurrence
     int* seen = (int*)calloc(n, sizeof(int));
+    int write_idx = 0;
     for (int i = 0; i < dt->cicEul_size; i++) {
         int v = dt->cicEul[i];
         if (!seen[v]) {
@@ -498,7 +566,7 @@ void Fleri(DoubleTree* dt) {
     dt->cicEul_size = write_idx;
     free(seen);
 
-    // Add 0 at the end to close the cycle
+    // Add 0 to close the cycle
     if (dt->cicEul_size < MAX_CYCLE) {
         dt->cicEul[dt->cicEul_size++] = 0;
     }
@@ -508,7 +576,7 @@ void Fleri(DoubleTree* dt) {
     for (int i = 0; i < dt->cicEul_size - 1; i++) {
         int u = dt->cicEul[i];
         int v = dt->cicEul[i + 1];
-        dt->sumPath += dt->graph[u][v];
+        dt->sumPath += graph[u][v];
     }
 }
 
@@ -519,16 +587,16 @@ void getCycle(DoubleTree* dt) {
 }
 
 // Main function to get the cycle, equivalent to C++ getCycleDoubleTree
-int* getCycleDoubleTree(float** graph, int* n_) {
-    int n = *n_;
-    DoubleTree dt;
-    DoubleTree_init(&dt, graph, n);
-    getCycle(&dt);
-    int* cycle = (int*)malloc(dt.cicEul_size * sizeof(int));
-    memcpy(cycle, dt.cicEul, dt.cicEul_size * sizeof(int));
-    DoubleTree_destroy(&dt);
-    return cycle;
-}
+// int* getCycleDoubleTree(float** graph, int* n_) {
+//     int n = *n_;
+//     DoubleTree dt;
+//     DoubleTree_init(&dt, graph, n);
+//     getCycle(&dt);
+//     int* cycle = (int*)malloc(dt.cicEul_size * sizeof(int));
+//     memcpy(cycle, dt.cicEul, dt.cicEul_size * sizeof(int));
+//     DoubleTree_destroy(&dt);
+//     return cycle;
+// }
 
 void tests(int v_min, int v_max, int n_tests)
 {
@@ -620,7 +688,7 @@ int main() {
     srand(time(NULL));
 
 
-    tests(5, 12, 10);
+    tests(5, 10, 100);
     // printf("Полный перебор:\n");
     // limit_of_runtime(&naive_brute_force);
 
@@ -629,7 +697,7 @@ int main() {
 
     // Graph* g_input = read_from_file(input_file);
 
-    // Graph* g = get_random_euclidean_graph(10);
+    // Graph* g = get_random_euclidean_graph(10)
 
     // print_graph(g->G, g->N, g->N);
 

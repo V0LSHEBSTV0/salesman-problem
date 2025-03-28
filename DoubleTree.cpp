@@ -105,58 +105,109 @@ public:
         return !visited[v];
     }
 
+    // void Fleri() {
+
+    //     std::stack<int> st;
+    //     int start = findStart();
+    //     st.push(start);
+
+    //     while (!st.empty()) {
+    //         int v = st.top();
+    //         bool found = false;
+
+    //         for (int i = 0; i < n; i++) {
+    //             if (ost[v][i] > 0){
+                    
+    //                 int countDegree = 0;
+    //                 for (int j = 0; j < n; j++) countDegree += ost[v][j];
+
+    //                 if (countDegree > 1 && checkBrig(v, i)) continue;
+
+    //                 st.push(i);
+    //                 ost[v][i]--;
+    //                 ost[i][v]--;
+    //                 found = true;
+    //                 break;
+                    
+    //             }
+    //         }
+
+    //         if (!found) {
+    //             cicEul.push_back(v);
+    //             st.pop();
+    //         }
+    //     }
+
+    //     for (int i = 0; i < cicEul.size(); i++) {
+    //         for (int j = i + 1; j < cicEul.size(); ) {
+    //             if (cicEul[i] == cicEul[j]) {
+    //                 for (int k = j; k + 1 < cicEul.size(); k++) {
+    //                     cicEul[k] = cicEul[k + 1];
+    //                 }
+    //                 cicEul.pop_back();
+    //             }
+    //             else {
+    //                 j++;
+    //             }
+    //         }
+    //     }
+
+    //     cicEul.push_back(0);
+
+    //     for (int i = 0; i < n; i++) {
+    //         sumPath += graph[cicEul[i]][cicEul[i+1]];
+    //     }
     void Fleri() {
-
         std::stack<int> st;
-        int start = findStart();
+        int start = 0; // Start from vertex 0 (all degrees even in doubled MST)
         st.push(start);
-
+    
+        std::vector<bool> visited_edges(n * n, false); // Track visited edges
+    
         while (!st.empty()) {
             int v = st.top();
             bool found = false;
-
+    
             for (int i = 0; i < n; i++) {
-                if (ost[v][i] > 0){
-                    
-                    int countDegree = 0;
-                    for (int j = 0; j < n; j++) countDegree += ost[v][j];
-
-                    if (countDegree > 1 && checkBrig(v, i)) continue;
-
+                int edge_idx = v * n + i;
+                if (ost[v][i] > 0 && !visited_edges[edge_idx]) {
                     st.push(i);
                     ost[v][i]--;
                     ost[i][v]--;
+                    visited_edges[edge_idx] = true;
+                    visited_edges[i * n + v] = true; // Mark symmetric edge
                     found = true;
                     break;
-                    
                 }
             }
-
+    
             if (!found) {
                 cicEul.push_back(v);
                 st.pop();
             }
         }
-
+    
+        // Remove duplicates, keeping first occurrence
+        std::vector<bool> seen(n, false);
+        int write_idx = 0;
         for (int i = 0; i < cicEul.size(); i++) {
-            for (int j = i + 1; j < cicEul.size(); ) {
-                if (cicEul[i] == cicEul[j]) {
-                    for (int k = j; k + 1 < cicEul.size(); k++) {
-                        cicEul[k] = cicEul[k + 1];
-                    }
-                    cicEul.pop_back();
-                }
-                else {
-                    j++;
-                }
+            int v = cicEul[i];
+            if (!seen[v]) {
+                cicEul[write_idx++] = v;
+                seen[v] = true;
             }
         }
-
+        cicEul.resize(write_idx);
+    
+        // Add 0 to close the cycle
         cicEul.push_back(0);
-
-        for (int i = 0; i < n; i++) {
-            sumPath += graph[cicEul[i]][cicEul[i+1]];
+    
+        // Compute sumPath (corrected to use cicEul.size() - 1)
+        sumPath = 0;
+        for (int i = 0; i < cicEul.size() - 1; i++) {
+            sumPath += graph[cicEul[i]][cicEul[i + 1]];
         }
+    }
         
     }
 
