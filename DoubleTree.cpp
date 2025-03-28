@@ -195,8 +195,7 @@ extern "C" {
         int* arr = new int[cycle.size()];
         std::copy(cycle.begin(), cycle.end(), arr);
 
-        std::cout << "Минимальная дистанция у даблтри: \n" << dt->getsum() << std::endl;
-        delete dt; 
+        delete dt;
         return arr;
     }
 }

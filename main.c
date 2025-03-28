@@ -295,14 +295,14 @@ double_t time_of_c_algs_runtime(int* (*func)(Graph*), Graph* g)
 }
 
 
-double_t time_of_cpp_algs_runtime(int* (*func)(weight**, int n), Graph* g)
+double_t time_of_cpp_algs_runtime(int* (*func)(weight**, int* n), Graph* g)
 {
     /* measures time_in miliseconds */
     
     clock_t begin;
     clock_t end;
     begin = clock();
-    func(g->G, g->N);
+    func(g->G, &g->N);
     end = clock();
     double_t delta = (double_t)(end - begin) / (CLOCKS_PER_SEC / 1000);
     return delta;
@@ -332,25 +332,96 @@ void limit_of_runtime(int* (*func)(Graph*))
 void tests(int v_min, int v_max, int n_tests)
 {
     Graph* g;
-    int avgtime = 0;
+
+    // resuling arrays
+    double_t* bf_avg_time = (double_t*)malloc((v_max - v_min + 1) * sizeof(double_t));
+    double_t* eager_avg_time = (double_t*)malloc((v_max - v_min + 1) * sizeof(double_t));
+    double_t* dtree_avg_time = (double_t*)malloc((v_max - v_min + 1) * sizeof(double_t));
+
+    double_t* eager_avg_distance = (double_t*)malloc((v_max - v_min + 1) * sizeof(double_t));
+    double_t* dtree_avg_distance = (double_t*)malloc((v_max - v_min + 1) * sizeof(double_t));
+
+    
+    double_t bf_total_time = 0;
+    double_t eager_total_time = 0;
+    double_t dtree_total_time = 0;
+
+    double_t bf_min_dist = 0;
+    double_t eager_min_dist = 0;
+    double_t dtree_min_dist = 0;
+
+
+    double_t eager_total_distance = 0;
+    double_t dtree_total_distance = 0;
+
+
     for (int n = v_min; n <= v_max; n++)
     {
-        g = get_random_euclidean_graph(n);
-        
-        // cycle over number of tests 
+        bf_total_time = 0;
+        eager_total_time = 0;
+        dtree_total_time = 0;
+        bf_min_dist = 0;
+
+        eager_min_dist = 0;
+        dtree_min_dist = 0;
+
+        dtree_total_distance = 0;
+        eager_total_distance = 0;
+
+        // cycle over number of 
         for (int i = 0; i < n_tests; i++ )
         {
+            g = get_random_euclidean_graph(n);
             
+            bf_min_dist = sum_of_cycle(g, naive_brute_force(g));
+            eager_min_dist = sum_of_cycle(g, eager_tsp(g));
+            dtree_min_dist = sum_of_cycle(g, getCycleDoubleTree(g->G, &g->N));
 
-        }
+            dtree_total_distance += (dtree_min_dist-bf_min_dist) / bf_min_dist;
+            eager_total_distance += (eager_min_dist-bf_min_dist) / bf_min_dist;
+            
+            bf_total_time += time_of_c_algs_runtime(&naive_brute_force, g);
+            eager_total_time += time_of_c_algs_runtime(&eager_tsp, g);
+            dtree_total_time += time_of_cpp_algs_runtime(&getCycleDoubleTree, g);
 
-        free(g);
+            free(g);
+        }   
+
+        bf_avg_time[n-v_min] = bf_total_time / n_tests;
+        eager_avg_time[n-v_min] = eager_total_time / n_tests;
+        dtree_avg_time[n-v_min] = dtree_total_time / n_tests;
+
+        eager_avg_distance[n-v_min] = eager_total_distance / n_tests; 
+        dtree_avg_distance[n-v_min] = dtree_total_distance / n_tests; 
+
+        printf("\n%d:\n", n);
+        printf("Точный. ");
+        printf("С.В.:\t%f. ", bf_avg_time[n-v_min]);
+
+        printf("Жадный. ");
+        printf("С.В.:\t%f. ", eager_avg_time[n-v_min]);
+        printf("С.О.:\t%f. ", eager_avg_distance[n-v_min]);
+        
+
+        printf("Doubletree. ");
+        printf("С.В.:\t%f. ", dtree_avg_time[n-v_min]);
+        printf("С.О.:\t%f. ", dtree_avg_distance[n-v_min]);
+
+
+        free(bf_avg_time);
+        free(eager_avg_time); 
+        free(dtree_avg_time); 
+        free(eager_avg_distance);
+        free(dtree_avg_distance);
+        
     }
 }
 
 int main() {
-    // srand(time(NULL));
+    srand(time(NULL));
 
+
+    tests(5, 13, 3);
     // printf("Полный перебор:\n");
     // limit_of_runtime(&naive_brute_force);
 
