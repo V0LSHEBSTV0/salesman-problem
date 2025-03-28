@@ -329,6 +329,25 @@ void limit_of_runtime(int* (*func)(Graph*))
     return;
 }
 
+void tests(int v_min, int v_max, int n_tests)
+{
+    Graph* g;
+    int avgtime = 0;
+    for (int n = v_min; n <= v_max; n++)
+    {
+        g = get_random_euclidean_graph(n);
+        
+        // cycle over number of tests 
+        for (int i = 0; i < n_tests; i++ )
+        {
+            
+
+        }
+
+        free(g);
+    }
+}
+
 int main() {
     // srand(time(NULL));
 
