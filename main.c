@@ -377,7 +377,7 @@ int main() {
     printf("Алгоритм даблтрии.\nПуть: ");
     print_cycle(path_dabltree, g->N);
 
-    printf("\nМинимальная дистанция: %d\n", getSum(dt));
+    printf("\nМинимальная дистанция: %f\n", getSum(dt));
 
     // // clean up
     // free(path_eager);
