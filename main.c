@@ -281,8 +281,7 @@ Graph* get_random_euclidean_graph(int n)
     return graph;
 }
 
-
-double_t time_of_alg_runtime(int* (*func)(Graph*), Graph* g)
+double_t time_of_c_algs_runtime(int* (*func)(Graph*), Graph* g)
 {
     /* measures time_in miliseconds */
     
@@ -290,6 +289,20 @@ double_t time_of_alg_runtime(int* (*func)(Graph*), Graph* g)
     clock_t end;
     begin = clock();
     func(g);
+    end = clock();
+    double_t delta = (double_t)(end - begin) / (CLOCKS_PER_SEC / 1000);
+    return delta;
+}
+
+
+double_t time_of_cpp_algs_runtime(int* (*func)(weight**, int n), Graph* g)
+{
+    /* measures time_in miliseconds */
+    
+    clock_t begin;
+    clock_t end;
+    begin = clock();
+    func(g->G, g->N);
     end = clock();
     double_t delta = (double_t)(end - begin) / (CLOCKS_PER_SEC / 1000);
     return delta;
@@ -305,7 +318,7 @@ void limit_of_runtime(int* (*func)(Graph*))
     {
         g = get_random_euclidean_graph(n);   
         
-        delta = time_of_alg_runtime(func, g);
+        delta = time_of_c_algs_runtime(func, g);
         n += 1;
 
         free(g->G);
@@ -319,8 +332,8 @@ void limit_of_runtime(int* (*func)(Graph*))
 int main() {
     srand(time(NULL));
 
-    printf("Полный перебор:\n");
-    limit_of_runtime(&naive_brute_force);
+    // printf("Полный перебор:\n");
+    // limit_of_runtime(&naive_brute_force);
 
     
     // char input_file[] = "input.txt";
@@ -369,5 +382,7 @@ int main() {
     // // clean up
     // free(path_eager);
     // free(path_naive);
+
+    // free()
     return 0;
 }

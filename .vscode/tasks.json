@@ -1,0 +1,75 @@
+
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "cppbuild",
+            "label": "C/C++: compile DoubleTree.cpp",
+            "command": "/usr/bin/g++",
+            "args": [
+                "-fdiagnostics-color=always",
+                "-g",
+                "-c",
+                "DoubleTree.cpp",
+                "-o",
+                "DoubleTree.o"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "detail": "Compile DoubleTree.cpp to object file"
+        },
+        {
+            "type": "cppbuild",
+            "label": "C/C++: compile main.c",
+            "command": "/usr/bin/gcc",
+            "args": [
+                "-fdiagnostics-color=always",
+                "-g",
+                "-c",
+                "main.c",
+                "-o",
+                "main.o"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "detail": "Compile main.c to object file"
+        },
+        {
+        "type": "cppbuild",
+        "label": "C/C++: build program",
+        "command": "/usr/bin/g++",
+        "args": [
+            "-fdiagnostics-color=always",
+            "-g",
+            "-o",
+            "program",
+            "main.o",
+            "DoubleTree.o"
+        ],
+        "options": {
+            "cwd": "${workspaceFolder}"
+        },
+        "problemMatcher": [
+            "$gcc"
+        ],
+        "group": {
+            "kind": "build",
+            "isDefault": true
+        },
+        "dependsOn": [
+            "C/C++: compile DoubleTree.cpp",
+            "C/C++: compile main.c"
+        ],
+        "dependsOrder": "sequence",
+        "detail": "Link object files into executable"
+        }
+    ]
+}
