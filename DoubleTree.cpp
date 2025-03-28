@@ -208,8 +208,6 @@ public:
             sumPath += graph[cicEul[i]][cicEul[i + 1]];
         }
     }
-        
-    }
 
     std::vector<int> getCycle(){
 

@@ -11,7 +11,15 @@
 #define INF 1e9
 #define DOT 46 
 
+#define EPS 1e-4
+
 typedef float weight;
+
+typedef struct runtime_test_result
+{
+    int* path;
+    double_t delta;
+} runtime_test_result;
 
 typedef struct Graph {
     int N;
@@ -281,31 +289,31 @@ Graph* get_random_euclidean_graph(int n)
     return graph;
 }
 
-double_t time_of_c_algs_runtime(int* (*func)(Graph*), Graph* g)
+runtime_test_result time_of_c_algs_runtime(int* (*func)(Graph*), Graph* g)
 {
     /* measures time_in miliseconds */
-    
     clock_t begin;
     clock_t end;
     begin = clock();
-    func(g);
+    int* path = func(g);
     end = clock();
-    double_t delta = (double_t)(end - begin) / (CLOCKS_PER_SEC / 1000);
-    return delta;
+    double_t delta = (double_t)(end - begin) / (CLOCKS_PER_SEC /1000);
+    runtime_test_result res = {path, delta};
+    return res;
 }
 
 
-double_t time_of_cpp_algs_runtime(int* (*func)(weight**, int* n), Graph* g)
+runtime_test_result time_of_cpp_algs_runtime(int* (*func)(weight**, int* n), Graph* g)
 {
     /* measures time_in miliseconds */
-    
     clock_t begin;
     clock_t end;
     begin = clock();
-    func(g->G, &g->N);
+    int* path = func(g->G, &g->N);
     end = clock();
     double_t delta = (double_t)(end - begin) / (CLOCKS_PER_SEC / 1000);
-    return delta;
+    runtime_test_result res = {path, delta};
+    return res;
 }
 
 void limit_of_runtime(int* (*func)(Graph*))
@@ -318,160 +326,226 @@ void limit_of_runtime(int* (*func)(Graph*))
     {
         g = get_random_euclidean_graph(n);   
         
-        delta = time_of_c_algs_runtime(func, g);
+        delta = time_of_c_algs_runtime(func, g).delta;
         n += 1;
 
         free(g->G);
         free(g);
-        printf("Число врешин: %d, Время(с): %f\n", n, delta);
+        printf("Число врешин: %d, Время(с): %f\n", n-1, delta);
     } while ( (delta < 180000.0));
 
     return;
 }
 
 
-#include <stdlib.h>
-#include <string.h>
-#include <float.h>
+// #include <stdlib.h>
+// #include <string.h>
+// #include <float.h>
 
-// Define maximum cycle size (adjust as needed for your graph size)
-#define MAX_CYCLE 2000
+// // Define maximum cycle size (adjust as needed for your graph size)
+// #define MAX_CYCLE 2000
 
-// Struct to hold DoubleTree data
-typedef struct {
-    float** graph;         // Adjacency matrix of edge weights
-    int n;                // Number of vertices
-    int** ost;            // Multiplicity of edges (spanning tree and Eulerian graph)
-    float sumPath;        // Total weight of the cycle (optional)
-    int cicEul[MAX_CYCLE]; // Array to store the Eulerian cycle
-    int cicEul_size;      // Current size of the cycle array
-} DoubleTree;
+// // Struct to hold DoubleTree data
+// typedef struct {
+//     float** graph;         // Adjacency matrix of edge weights
+//     int n;                // Number of vertices
+//     int** ost;            // Multiplicity of edges (spanning tree and Eulerian graph)
+//     float sumPath;        // Total weight of the cycle (optional)
+//     int cicEul[MAX_CYCLE]; // Array to store the Eulerian cycle
+//     int cicEul_size;      // Current size of the cycle array
+// } DoubleTree;
 
-// Initialize the DoubleTree struct
-void DoubleTree_init(DoubleTree* dt, float** graph, int n) {
-    dt->graph = graph;
-    dt->n = n;
-    // Allocate ost as a 2D array
-    dt->ost = (int**)malloc(n * sizeof(int*));
-    for (int i = 0; i < n; i++) {
-        dt->ost[i] = (int*)calloc(n, sizeof(int)); // Initialize to 0
-    }
-    dt->sumPath = 0;
-    dt->cicEul_size = 0;
-}
+// // Initialize the DoubleTree struct
+// void DoubleTree_init(DoubleTree* dt, float** graph, int n) {
+//     dt->graph = graph;
+//     dt->n = n;
+//     // Allocate ost as a 2D array
+//     dt->ost = (int**)malloc(n * sizeof(int*));
+//     for (int i = 0; i < n; i++) {
+//         dt->ost[i] = (int*)calloc(n, sizeof(int)); // Initialize to 0
+//     }
+//     dt->sumPath = 0;
+//     dt->cicEul_size = 0;
+// }
 
-// Free allocated memory
-void DoubleTree_destroy(DoubleTree* dt) {
-    for (int i = 0; i < dt->n; i++) {
-        free(dt->ost[i]);
-    }
-    free(dt->ost);
-}
+// // Free allocated memory
+// void DoubleTree_destroy(DoubleTree* dt) {
+//     for (int i = 0; i < dt->n; i++) {
+//         free(dt->ost[i]);
+//     }
+//     free(dt->ost);
+// }
 
-// Depth-First Search for bridge checking
-void dfs(int u, int** ost, int n, int* visited) {
-    visited[u] = 1;
-    for (int v = 0; v < n; v++) {
-        if (ost[u][v] > 0 && !visited[v]) {
-            dfs(v, ost, n, visited);
-        }
-    }
-}
+// // Depth-First Search for bridge checking
+// void dfs(int u, int** ost, int n, int* visited) {
+//     visited[u] = 1;
+//     for (int v = 0; v < n; v++) {
+//         if (ost[u][v] > 0 && !visited[v]) {
+//             dfs(v, ost, n, visited);
+//         }
+//     }
+// }
 
-// Check if edge (u, v) is a bridge
-int checkBrig(int u, int v, int** ost, int n) {
-    if (ost[u][v] == 0) return 0;
-    ost[u][v]--;
-    ost[v][u]--;
-    int* visited = (int*)calloc(n, sizeof(int));
-    dfs(u, ost, n, visited);
-    ost[u][v]++;
-    ost[v][u]++;
-    int is_bridge = !visited[v];
-    free(visited);
-    return is_bridge;
-}
+// // Check if edge (u, v) is a bridge
+// int checkBrig(int u, int v, int** ost, int n) {
+//     if (ost[u][v] == 0) return 0;
+//     ost[u][v]--;
+//     ost[v][u]--;
+//     int* visited = (int*)calloc(n, sizeof(int));
+//     dfs(u, ost, n, visited);
+//     ost[u][v]++;
+//     ost[v][u]++;
+//     int is_bridge = !visited[v];
+//     free(visited);
+//     return is_bridge;
+// }
 
-// Find starting vertex (vertex with odd degree, or 0 if all degrees are even)
-int findStart(int** ost, int n) {
-    for (int i = 0; i < n; i++) {
-        int degree = 0;
-        for (int j = 0; j < n; j++) {
-            if (ost[i][j] > 0) {
-                degree++;
-            }
-        }
-        if (degree % 2 != 0) {
-            return i;
-        }
-    }
-    return 0; // All degrees even, start from vertex 0
-}
+// // Find starting vertex (vertex with odd degree, or 0 if all degrees are even)
+// int findStart(int** ost, int n) {
+//     for (int i = 0; i < n; i++) {
+//         int degree = 0;
+//         for (int j = 0; j < n; j++) {
+//             if (ost[i][j] > 0) {
+//                 degree++;
+//             }
+//         }
+//         if (degree % 2 != 0) {
+//             return i;
+//         }
+//     }
+//     return 0; // All degrees even, start from vertex 0
+// }
 
-// Build minimum spanning tree and duplicate edges
-void AlgPrima(DoubleTree* dt) {
-    int n = dt->n;
-    float** graph = dt->graph;
-    int** ost = dt->ost;
+// // Build minimum spanning tree and duplicate edges
+// void AlgPrima(DoubleTree* dt) {
+//     int n = dt->n;
+//     float** graph = dt->graph;
+//     int** ost = dt->ost;
 
-    int* visited = (int*)calloc(n, sizeof(int));
-    visited[0] = 1;
-    int U_size = 1;
+//     int* visited = (int*)calloc(n, sizeof(int));
+//     visited[0] = 1;
+//     int U_size = 1;
 
-    while (U_size < n) {
-        float min = FLT_MAX;
-        int imin_first = -1;
-        int imin_second = -1;
+//     while (U_size < n) {
+//         float min = FLT_MAX;
+//         int imin_first = -1;
+//         int imin_second = -1;
 
-        for (int j = 0; j < n; j++) {
-            if (visited[j]) {
-                for (int k = 0; k < n; k++) {
-                    if (!visited[k] && graph[j][k] != 0.0) {
-                        if (graph[j][k] < min) {
-                            min = graph[j][k];
-                            imin_first = j;
-                            imin_second = k;
-                        }
-                    }
-                }
-            }
-        }
+//         for (int j = 0; j < n; j++) {
+//             if (visited[j]) {
+//                 for (int k = 0; k < n; k++) {
+//                     if (!visited[k] && graph[j][k] != 0.0) {
+//                         if (graph[j][k] < min) {
+//                             min = graph[j][k];
+//                             imin_first = j;
+//                             imin_second = k;
+//                         }
+//                     }
+//                 }
+//             }
+//         }
 
-        if (imin_first != -1 && imin_second != -1) {
-            ost[imin_first][imin_second] = 2; // Duplicate edge
-            ost[imin_second][imin_first] = 2;
-            visited[imin_second] = 1;
-            U_size++;
-        }
-    }
-    free(visited);
-}
+//         if (imin_first != -1 && imin_second != -1) {
+//             ost[imin_first][imin_second] = 2; // Duplicate edge
+//             ost[imin_second][imin_first] = 2;
+//             visited[imin_second] = 1;
+//             U_size++;
+//         }
+//     }
+//     free(visited);
+// }
 
-// // Compute Eulerian cycle using Fleury's algorithm and shortcut it
+// // // Compute Eulerian cycle using Fleury's algorithm and shortcut it
+// // void Fleri(DoubleTree* dt) {
+// //     int n = dt->n;
+// //     int** ost = dt->ost;
+// //     int stack[MAX_CYCLE];
+// //     int top = -1;
+// //     int start = findStart(ost, n);
+// //     stack[++top] = start;
+
+// //     while (top >= 0) {
+// //         int v = stack[top];
+// //         int found = 0;
+
+// //         for (int i = 0; i < n; i++) {
+// //             if (ost[v][i] > 0) {
+// //                 int degree = 0;
+// //                 for (int j = 0; j < n; j++) {
+// //                     if (ost[v][j] > 0) degree++;
+// //                 }
+
+// //                 if (degree > 1 && checkBrig(v, i, ost, n)) continue;
+
+// //                 stack[++top] = i;
+// //                 ost[v][i]--;
+// //                 ost[i][v]--;
+// //                 found = 1;
+// //                 break;
+// //             }
+// //         }
+
+// //         if (!found) {
+// //             if (dt->cicEul_size < MAX_CYCLE) {
+// //                 dt->cicEul[dt->cicEul_size++] = v;
+// //             }
+// //             top--;
+// //         }
+// //     }
+
+// //     // Remove duplicates, keeping first occurrence
+// //     int write_idx = 0;
+// //     int* seen = (int*)calloc(n, sizeof(int));
+// //     for (int i = 0; i < dt->cicEul_size; i++) {
+// //         int v = dt->cicEul[i];
+// //         if (!seen[v]) {
+// //             dt->cicEul[write_idx++] = v;
+// //             seen[v] = 1;
+// //         }
+// //     }
+// //     dt->cicEul_size = write_idx;
+// //     free(seen);
+
+// //     // Add 0 at the end to close the cycle
+// //     if (dt->cicEul_size < MAX_CYCLE) {
+// //         dt->cicEul[dt->cicEul_size++] = 0;
+// //     }
+
+// //     // Compute sumPath
+// //     dt->sumPath = 0;
+// //     for (int i = 0; i < dt->cicEul_size - 1; i++) {
+// //         int u = dt->cicEul[i];
+// //         int v = dt->cicEul[i + 1];
+// //         dt->sumPath += dt->graph[u][v];
+// //     }
+// // }
+
+// // Compute Eulerian cycle and shortcut it in O(n^2)
 // void Fleri(DoubleTree* dt) {
 //     int n = dt->n;
 //     int** ost = dt->ost;
+//     float** graph = dt->graph;
 //     int stack[MAX_CYCLE];
 //     int top = -1;
-//     int start = findStart(ost, n);
+//     int* visited_edges = (int*)calloc(n * n, sizeof(int)); // Track visited edges
+//     int start = 0; // Start from vertex 0 (all degrees even in doubled MST)
+
+//     // Push starting vertex
 //     stack[++top] = start;
 
 //     while (top >= 0) {
 //         int v = stack[top];
 //         int found = 0;
 
+//         // Find the next unvisited edge
 //         for (int i = 0; i < n; i++) {
-//             if (ost[v][i] > 0) {
-//                 int degree = 0;
-//                 for (int j = 0; j < n; j++) {
-//                     if (ost[v][j] > 0) degree++;
-//                 }
-
-//                 if (degree > 1 && checkBrig(v, i, ost, n)) continue;
-
+//             int edge_idx = v * n + i;
+//             if (ost[v][i] > 0 && !visited_edges[edge_idx]) {
 //                 stack[++top] = i;
 //                 ost[v][i]--;
 //                 ost[i][v]--;
+//                 visited_edges[edge_idx] = 1;
+//                 visited_edges[i * n + v] = 1; // Mark symmetric edge
 //                 found = 1;
 //                 break;
 //             }
@@ -485,9 +559,11 @@ void AlgPrima(DoubleTree* dt) {
 //         }
 //     }
 
-//     // Remove duplicates, keeping first occurrence
-//     int write_idx = 0;
+//     free(visited_edges);
+
+//     // Remove duplicates in-place, keeping first occurrence
 //     int* seen = (int*)calloc(n, sizeof(int));
+//     int write_idx = 0;
 //     for (int i = 0; i < dt->cicEul_size; i++) {
 //         int v = dt->cicEul[i];
 //         if (!seen[v]) {
@@ -498,7 +574,7 @@ void AlgPrima(DoubleTree* dt) {
 //     dt->cicEul_size = write_idx;
 //     free(seen);
 
-//     // Add 0 at the end to close the cycle
+//     // Add 0 to close the cycle
 //     if (dt->cicEul_size < MAX_CYCLE) {
 //         dt->cicEul[dt->cicEul_size++] = 0;
 //     }
@@ -508,83 +584,15 @@ void AlgPrima(DoubleTree* dt) {
 //     for (int i = 0; i < dt->cicEul_size - 1; i++) {
 //         int u = dt->cicEul[i];
 //         int v = dt->cicEul[i + 1];
-//         dt->sumPath += dt->graph[u][v];
+//         dt->sumPath += graph[u][v];
 //     }
 // }
 
-// Compute Eulerian cycle and shortcut it in O(n^2)
-void Fleri(DoubleTree* dt) {
-    int n = dt->n;
-    int** ost = dt->ost;
-    float** graph = dt->graph;
-    int stack[MAX_CYCLE];
-    int top = -1;
-    int* visited_edges = (int*)calloc(n * n, sizeof(int)); // Track visited edges
-    int start = 0; // Start from vertex 0 (all degrees even in doubled MST)
-
-    // Push starting vertex
-    stack[++top] = start;
-
-    while (top >= 0) {
-        int v = stack[top];
-        int found = 0;
-
-        // Find the next unvisited edge
-        for (int i = 0; i < n; i++) {
-            int edge_idx = v * n + i;
-            if (ost[v][i] > 0 && !visited_edges[edge_idx]) {
-                stack[++top] = i;
-                ost[v][i]--;
-                ost[i][v]--;
-                visited_edges[edge_idx] = 1;
-                visited_edges[i * n + v] = 1; // Mark symmetric edge
-                found = 1;
-                break;
-            }
-        }
-
-        if (!found) {
-            if (dt->cicEul_size < MAX_CYCLE) {
-                dt->cicEul[dt->cicEul_size++] = v;
-            }
-            top--;
-        }
-    }
-
-    free(visited_edges);
-
-    // Remove duplicates in-place, keeping first occurrence
-    int* seen = (int*)calloc(n, sizeof(int));
-    int write_idx = 0;
-    for (int i = 0; i < dt->cicEul_size; i++) {
-        int v = dt->cicEul[i];
-        if (!seen[v]) {
-            dt->cicEul[write_idx++] = v;
-            seen[v] = 1;
-        }
-    }
-    dt->cicEul_size = write_idx;
-    free(seen);
-
-    // Add 0 to close the cycle
-    if (dt->cicEul_size < MAX_CYCLE) {
-        dt->cicEul[dt->cicEul_size++] = 0;
-    }
-
-    // Compute sumPath
-    dt->sumPath = 0;
-    for (int i = 0; i < dt->cicEul_size - 1; i++) {
-        int u = dt->cicEul[i];
-        int v = dt->cicEul[i + 1];
-        dt->sumPath += graph[u][v];
-    }
-}
-
-// Get the Eulerian cycle
-void getCycle(DoubleTree* dt) {
-    AlgPrima(dt);
-    Fleri(dt);
-}
+// // Get the Eulerian cycle
+// void getCycle(DoubleTree* dt) {
+//     AlgPrima(dt);
+//     Fleri(dt);
+// }
 
 // Main function to get the cycle, equivalent to C++ getCycleDoubleTree
 // int* getCycleDoubleTree(float** graph, int* n_) {
@@ -598,7 +606,7 @@ void getCycle(DoubleTree* dt) {
 //     return cycle;
 // }
 
-void tests(int v_min, int v_max, int n_tests)
+void tests(int v_min, int v_max, int n_tests, FILE* fp)
 {
     Graph* g;
 
@@ -619,10 +627,17 @@ void tests(int v_min, int v_max, int n_tests)
     double_t eager_min_dist = 0;
     double_t dtree_min_dist = 0;
 
-
     double_t eager_total_distance = 0;
     double_t dtree_total_distance = 0;
 
+    int eager_number_of_best = 0;
+    int dtree_number_of_best = 0;
+
+    runtime_test_result bf_res;
+    runtime_test_result eager_res;
+    runtime_test_result dtree_res;
+
+    fprintf(fp, "n,number_of_tests,bf_avg_time,eager_avg_time,eager_avg_dist,dtree_avg_time,dtree_avg_dist,eager_match_best,dtree_match_best\n");
 
     for (int n = v_min; n <= v_max; n++)
     {
@@ -637,58 +652,83 @@ void tests(int v_min, int v_max, int n_tests)
         dtree_total_distance = 0;
         eager_total_distance = 0;
 
-        // cycle over number of 
-        for (int i = 0; i < n_tests; i++ )
+        eager_number_of_best = 0;
+        dtree_number_of_best = 0;
+
+        // cycle over number of tests
+        for (int i = 0; i < n_tests - (n - v_min) * 10; i++ )
         {
             g = get_random_euclidean_graph(n);
             
-            bf_min_dist = sum_of_cycle(g, naive_brute_force(g));
-            eager_min_dist = sum_of_cycle(g, eager_tsp(g));
-            dtree_min_dist = sum_of_cycle(g, getCycleDoubleTree(g->G, &g->N));
 
+            bf_res = time_of_c_algs_runtime(&naive_brute_force, g);
+            eager_res = time_of_c_algs_runtime(&eager_tsp, g);
+            dtree_res = time_of_cpp_algs_runtime(&getCycleDoubleTree, g);
+
+            
+            bf_min_dist = sum_of_cycle(g, bf_res.path);
+            eager_min_dist = sum_of_cycle(g, eager_res.path);
+            dtree_min_dist = sum_of_cycle(g, dtree_res.path);
+
+            if(abs(bf_min_dist - eager_min_dist) < EPS)
+                eager_number_of_best++;
+
+            if(abs(bf_min_dist - dtree_min_dist) < EPS)
+                dtree_number_of_best++;
+            
             dtree_total_distance += (dtree_min_dist-bf_min_dist) / bf_min_dist;
             eager_total_distance += (eager_min_dist-bf_min_dist) / bf_min_dist;
             
-            bf_total_time += time_of_c_algs_runtime(&naive_brute_force, g);
-            eager_total_time += time_of_c_algs_runtime(&eager_tsp, g);
-            dtree_total_time += time_of_cpp_algs_runtime(&getCycleDoubleTree, g);
+            
+            bf_total_time += bf_res.delta;
+            eager_total_time += eager_res.delta;
+            dtree_total_time += dtree_res.delta;
 
+            free(bf_res.path);
+            free(eager_res.path);
+            free(dtree_res.path);
             free(g);
         }   
 
-        bf_avg_time[n-v_min] = bf_total_time / n_tests;
-        eager_avg_time[n-v_min] = eager_total_time / n_tests;
-        dtree_avg_time[n-v_min] = dtree_total_time / n_tests;
+        bf_avg_time[n-v_min] = bf_total_time / (n_tests - (n - v_min) * 10);
+        eager_avg_time[n-v_min] = eager_total_time / (n_tests - (n - v_min) * 10);
+        dtree_avg_time[n-v_min] = dtree_total_time / (n_tests - (n - v_min) * 10);
 
-        eager_avg_distance[n-v_min] = eager_total_distance / n_tests; 
-        dtree_avg_distance[n-v_min] = dtree_total_distance / n_tests; 
+        eager_avg_distance[n-v_min] = eager_total_distance / (n_tests - (n - v_min) * 10); 
+        dtree_avg_distance[n-v_min] = dtree_total_distance / (n_tests - (n - v_min) * 10); 
 
-        printf("\nn = %d:\t", n);
-        printf("Точный. ");
-        printf("С.В.:\t%f. ", bf_avg_time[n-v_min]);
-
-        printf("\tЖадный. ");
-        printf("С.В.:\t%f. ", eager_avg_time[n-v_min]);
-        printf("С.О.:\t%f. ", eager_avg_distance[n-v_min]);
         
+        fprintf(fp, "%d,%d,", n, n_tests-(n-v_min)*10);
+        fprintf(fp, "%f,", bf_avg_time[n-v_min]);
 
-        printf("Doubletree. ");
-        printf("С.В.:\t%f. ", dtree_avg_time[n-v_min]);
-        printf("С.О.:\t%f. ", dtree_avg_distance[n-v_min]);
-        
+        fprintf(fp, "%f,", eager_avg_time[n-v_min]);
+        fprintf(fp, "%f,", eager_avg_distance[n-v_min]);
+
+        fprintf(fp, "%f,", dtree_avg_time[n-v_min]);
+        fprintf(fp, "%f,", dtree_avg_distance[n-v_min]);
+ 
+        fprintf(fp, "%d,%d\n", eager_number_of_best, dtree_number_of_best);
     }
+
     free(bf_avg_time);
     free(eager_avg_time); 
-    //free(dtree_avg_time); 
+    free(dtree_avg_time); 
     free(eager_avg_distance);
-    //free(dtree_avg_distance);
+    free(dtree_avg_distance);
 }
 
 int main() {
     srand(time(NULL));
 
+    char* output_file = "./analysis/output.csv";
+    FILE* fp = fopen(output_file, "w");
 
-    tests(5, 10, 100);
+    tests(3, 12, 110, fp);
+
+    fclose(fp);
+
+
+
     // printf("Полный перебор:\n");
     // limit_of_runtime(&naive_brute_force);
 
