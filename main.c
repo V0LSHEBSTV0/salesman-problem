@@ -326,7 +326,7 @@ int main() {
 
     // Graph* g_input = read_from_file(input_file);
 
-    // Graph* g = get_random_euclidean_graph(10);
+    Graph* g = get_random_euclidean_graph(10);
 
     // print_graph(g->G, g->N, g->N);
 
@@ -365,10 +365,6 @@ int main() {
 
     printf("\nМинимальная дистанция: %d\n", getSum(dt));
 
-
-    // clean up
-    free(path_eager);
-    free(path_naive);
     // // clean up
     // free(path_eager);
     // free(path_naive);

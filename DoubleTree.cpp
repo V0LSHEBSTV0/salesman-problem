@@ -9,15 +9,15 @@
 
 class DoubleTree {
 private:
-    std::vector<std::vector<int>>graph;
+    std::vector<std::vector<float>>graph;
     int n;
     std::vector<std::vector<int>> ost;
 
-    int sumPath = 0;
+    float sumPath = 0;
     std::vector<int> cicEul;
     
 public:
-    DoubleTree(std::vector<std::vector<int>> graph_, int n_) {
+    DoubleTree(std::vector<std::vector<float>> graph_, int n_) {
         graph = graph_;
         n = n_;
         ost = std::vector<std::vector<int>>(n, std::vector<int>(n, 0));
@@ -28,13 +28,13 @@ public:
         
 
         while(U.size() != n) {
-            int min = INT_MAX;
+            float min = std::numeric_limits<float>::max();
             std::pair<int, int>imin = { -1, -1 }; // ребра не могут иметь отрицательные веса в евклидовом графе
 
 
             for (auto const& j : U) {
                 for (int k = 0; k < n; k++) {
-                    if ((std::find(U.begin(), U.end(), k) == U.end()) && graph[j][k] != 0) {
+                    if ((std::find(U.begin(), U.end(), k) == U.end()) && graph[j][k] != 0.0) {
                         if (graph[j][k] < min) {
                             min = graph[j][k];
                             imin = {j, k };
@@ -141,7 +141,7 @@ public:
         for (int i = 0; i < cicEul.size(); i++) {
             for (int j = i + 1; j < cicEul.size(); ) {
                 if (cicEul[i] == cicEul[j]) {
-                    for (size_t k = j; k + 1 < cicEul.size(); k++) {
+                    for (int k = j; k + 1 < cicEul.size(); k++) {
                         cicEul[k] = cicEul[k + 1];
                     }
                     cicEul.pop_back();
@@ -173,8 +173,8 @@ public:
 };
 
 extern "C" {
-    DoubleTree* createDoubleTree(int** graph, int n) {
-        std::vector<std::vector<int>> graphVec(n, std::vector<int>(n)); //граф из си переводится в вектор
+    DoubleTree* createDoubleTree(float** graph, int n) {
+        std::vector<std::vector<float>> graphVec(n, std::vector<float>(n)); //граф из си переводится в вектор
         for (int i = 0; i < n; ++i)
             for (int j = 0; j < n; ++j)
                 graphVec[i][j] = graph[i][j];
