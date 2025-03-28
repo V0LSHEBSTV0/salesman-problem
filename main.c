@@ -394,11 +394,11 @@ void tests(int v_min, int v_max, int n_tests)
         eager_avg_distance[n-v_min] = eager_total_distance / n_tests; 
         dtree_avg_distance[n-v_min] = dtree_total_distance / n_tests; 
 
-        printf("\n%d:\n", n);
+        printf("\nn = %d:\t", n);
         printf("Точный. ");
         printf("С.В.:\t%f. ", bf_avg_time[n-v_min]);
 
-        printf("Жадный. ");
+        printf("\tЖадный. ");
         printf("С.В.:\t%f. ", eager_avg_time[n-v_min]);
         printf("С.О.:\t%f. ", eager_avg_distance[n-v_min]);
         
@@ -406,22 +406,20 @@ void tests(int v_min, int v_max, int n_tests)
         printf("Doubletree. ");
         printf("С.В.:\t%f. ", dtree_avg_time[n-v_min]);
         printf("С.О.:\t%f. ", dtree_avg_distance[n-v_min]);
-
-
-        free(bf_avg_time);
-        free(eager_avg_time); 
-        free(dtree_avg_time); 
-        free(eager_avg_distance);
-        free(dtree_avg_distance);
         
     }
+    free(bf_avg_time);
+    free(eager_avg_time); 
+    //free(dtree_avg_time); 
+    free(eager_avg_distance);
+    //free(dtree_avg_distance);
 }
 
 int main() {
     srand(time(NULL));
 
 
-    tests(5, 13, 3);
+    tests(5, 12, 10);
     // printf("Полный перебор:\n");
     // limit_of_runtime(&naive_brute_force);
 
@@ -430,7 +428,7 @@ int main() {
 
     // Graph* g_input = read_from_file(input_file);
 
-    Graph* g = get_random_euclidean_graph(10);
+    // Graph* g = get_random_euclidean_graph(10);
 
     // print_graph(g->G, g->N, g->N);
 
@@ -460,9 +458,9 @@ int main() {
     // printf("\n\n");
 
     
-    int* path_dabltree = getCycleDoubleTree(g->G, &g->N);
-    printf("Алгоритм даблтрии.\nПуть: ");
-    print_cycle(path_dabltree, g->N);
+    // int* path_dabltree = getCycleDoubleTree(g->G, &g->N);
+    // printf("Алгоритм даблтрии.\nПуть: ");
+    // print_cycle(path_dabltree, g->N);
 
 
     // // clean up

@@ -172,9 +172,6 @@ public:
     int getsum() {
         return sumPath;
     }
-
-
-    
 };
 
 extern "C" {
