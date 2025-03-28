@@ -259,7 +259,7 @@ Graph* get_random_euclidean_graph(int n)
     for (int i = 0; i < n; i++)
     {
         vertices[i] = get_random_point(100, 100);
-        printf("%f, %f", vertices[i].x, vertices[i].y);
+        // printf("%f, %f", vertices[i].x, vertices[i].y);
     }
 
     weight** G = (weight**)malloc(n * sizeof(weight*));
@@ -279,44 +279,82 @@ Graph* get_random_euclidean_graph(int n)
     return graph;
 }
 
-int main() {
-    srand(time(NULL));    
-    char input_file[] = "input.txt";
 
-    Graph* g_input = read_from_file(input_file);
+double_t time_of_alg_runtime(int* (*func)(Graph*), Graph* g)
+{
+    clock_t begin;
+    clock_t end;
+    begin = clock();
+    func(g);
+    end = clock();
+    double_t delta = (double_t)(end - begin) / CLOCKS_PER_SEC;;
+    return delta;
+}
 
-    Graph* g = get_random_euclidean_graph(10);
-
-    print_graph(g->G, g->N, g->N);
-
-    if (!is_euclidean_graph(g))
+void limit_of_runtime(int* (*func)(Graph*))
+{
+    int n = 1;
+    Graph* g;
+    
+    double_t delta = 0.0;
+    do 
     {
-        printf("Граф не евклидов\n");
-        return -1;
-    }
-    else 
-        printf("Граф евклидов\n");
+        g = get_random_euclidean_graph(n);   
+        
+        
+        delta = time_of_alg_runtime(func, g);
+        n += 1;
+
+        free(g->G);
+        free(g);
+        printf("Число врешин: %d, Время(с): %f\n", n, delta);
+    } while ( (delta < 180.0));
+
+    return;
+}
+
+int main() {
+    srand(time(NULL));
+
+    printf("Полный перебор:\n");
+    limit_of_runtime(&naive_brute_force);
+
+    
+    // char input_file[] = "input.txt";
+
+    // Graph* g_input = read_from_file(input_file);
+
+    // Graph* g = get_random_euclidean_graph(10);
+
+    // print_graph(g->G, g->N, g->N);
+
+    // if (!is_euclidean_graph(g))
+    // {
+    //     printf("Граф не евклидов\n");
+    //     return -1;
+    // }
+    // else 
+    //     printf("Граф евклидов\n");
         
 
-    int* path_naive = naive_brute_force(g);
-    weight dist_naive = sum_of_cycle(g, path_naive);
-    printf("Полный перебор.\n");
-    printf("Минимальная дистанция: %f\n", dist_naive);
-    printf("Путь: ");
-    print_cycle(path_naive, g->N);
-    printf("\n\n");
+    // int* path_naive = naive_brute_force(g);
+    // weight dist_naive = sum_of_cycle(g, path_naive);
+    // printf("Полный перебор.\n");
+    // printf("Минимальная дистанция: %f\n", dist_naive);
+    // printf("Путь: ");
+    // print_cycle(path_naive, g->N);
+    // printf("\n\n");
 
+    // int* path_eager = eager_tsp(g);
+    // weight dist_eager = sum_of_cycle(g, path_eager);
+    // printf("Жадный алгоритм.\n");
+    // printf("Минимальная дистанция: %f\n", dist_eager);
+    // printf("Путь: ");
+    // print_cycle(path_eager, g->N);
+    // printf("\n\n");
 
-    int* path_eager = eager_tsp(g);
-    weight dist_eager = sum_of_cycle(g, path_eager);
-    printf("Жадный алгоритм.\n");
-    printf("Минимальная дистанция: %f\n", dist_eager);
-    printf("Путь: ");
-    print_cycle(path_eager, g->N);
-    printf("\n\n");
-
-    // clean up
-    free(path_eager);
-    free(path_naive);
+    // // clean up
+    // free(path_eager);
+    // free(path_naive);
     return 0;
 }
