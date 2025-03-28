@@ -27,7 +27,6 @@ public:
     void AlgPrima() { // постройка остовного дерева
         std::vector<int> U = { 0 };
         
-
         while(U.size() != n) {
             float min = std::numeric_limits<float>::max();
             std::pair<int, int>imin = { -1, -1 }; // ребра не могут иметь отрицательные веса в евклидовом графе

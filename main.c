@@ -329,6 +329,207 @@ void limit_of_runtime(int* (*func)(Graph*))
     return;
 }
 
+
+#include <stdlib.h>
+#include <string.h>
+#include <float.h>
+
+// Define maximum cycle size (adjust as needed for your graph size)
+#define MAX_CYCLE 2000
+
+// Struct to hold DoubleTree data
+typedef struct {
+    float** graph;         // Adjacency matrix of edge weights
+    int n;                // Number of vertices
+    int** ost;            // Multiplicity of edges (spanning tree and Eulerian graph)
+    float sumPath;        // Total weight of the cycle (optional)
+    int cicEul[MAX_CYCLE]; // Array to store the Eulerian cycle
+    int cicEul_size;      // Current size of the cycle array
+} DoubleTree;
+
+// Initialize the DoubleTree struct
+void DoubleTree_init(DoubleTree* dt, float** graph, int n) {
+    dt->graph = graph;
+    dt->n = n;
+    // Allocate ost as a 2D array
+    dt->ost = (int**)malloc(n * sizeof(int*));
+    for (int i = 0; i < n; i++) {
+        dt->ost[i] = (int*)calloc(n, sizeof(int)); // Initialize to 0
+    }
+    dt->sumPath = 0;
+    dt->cicEul_size = 0;
+}
+
+// Free allocated memory
+void DoubleTree_destroy(DoubleTree* dt) {
+    for (int i = 0; i < dt->n; i++) {
+        free(dt->ost[i]);
+    }
+    free(dt->ost);
+}
+
+// Depth-First Search for bridge checking
+void dfs(int u, int** ost, int n, int* visited) {
+    visited[u] = 1;
+    for (int v = 0; v < n; v++) {
+        if (ost[u][v] > 0 && !visited[v]) {
+            dfs(v, ost, n, visited);
+        }
+    }
+}
+
+// Check if edge (u, v) is a bridge
+int checkBrig(int u, int v, int** ost, int n) {
+    if (ost[u][v] == 0) return 0;
+    ost[u][v]--;
+    ost[v][u]--;
+    int* visited = (int*)calloc(n, sizeof(int));
+    dfs(u, ost, n, visited);
+    ost[u][v]++;
+    ost[v][u]++;
+    int is_bridge = !visited[v];
+    free(visited);
+    return is_bridge;
+}
+
+// Find starting vertex (vertex with odd degree, or 0 if all degrees are even)
+int findStart(int** ost, int n) {
+    for (int i = 0; i < n; i++) {
+        int degree = 0;
+        for (int j = 0; j < n; j++) {
+            if (ost[i][j] > 0) {
+                degree++;
+            }
+        }
+        if (degree % 2 != 0) {
+            return i;
+        }
+    }
+    return 0; // All degrees even, start from vertex 0
+}
+
+// Build minimum spanning tree and duplicate edges
+void AlgPrima(DoubleTree* dt) {
+    int n = dt->n;
+    float** graph = dt->graph;
+    int** ost = dt->ost;
+
+    int* visited = (int*)calloc(n, sizeof(int));
+    visited[0] = 1;
+    int U_size = 1;
+
+    while (U_size < n) {
+        float min = FLT_MAX;
+        int imin_first = -1;
+        int imin_second = -1;
+
+        for (int j = 0; j < n; j++) {
+            if (visited[j]) {
+                for (int k = 0; k < n; k++) {
+                    if (!visited[k] && graph[j][k] != 0.0) {
+                        if (graph[j][k] < min) {
+                            min = graph[j][k];
+                            imin_first = j;
+                            imin_second = k;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (imin_first != -1 && imin_second != -1) {
+            ost[imin_first][imin_second] = 2; // Duplicate edge
+            ost[imin_second][imin_first] = 2;
+            visited[imin_second] = 1;
+            U_size++;
+        }
+    }
+    free(visited);
+}
+
+// Compute Eulerian cycle using Fleury's algorithm and shortcut it
+void Fleri(DoubleTree* dt) {
+    int n = dt->n;
+    int** ost = dt->ost;
+    int stack[MAX_CYCLE];
+    int top = -1;
+    int start = findStart(ost, n);
+    stack[++top] = start;
+
+    while (top >= 0) {
+        int v = stack[top];
+        int found = 0;
+
+        for (int i = 0; i < n; i++) {
+            if (ost[v][i] > 0) {
+                int degree = 0;
+                for (int j = 0; j < n; j++) {
+                    if (ost[v][j] > 0) degree++;
+                }
+
+                if (degree > 1 && checkBrig(v, i, ost, n)) continue;
+
+                stack[++top] = i;
+                ost[v][i]--;
+                ost[i][v]--;
+                found = 1;
+                break;
+            }
+        }
+
+        if (!found) {
+            if (dt->cicEul_size < MAX_CYCLE) {
+                dt->cicEul[dt->cicEul_size++] = v;
+            }
+            top--;
+        }
+    }
+
+    // Remove duplicates, keeping first occurrence
+    int write_idx = 0;
+    int* seen = (int*)calloc(n, sizeof(int));
+    for (int i = 0; i < dt->cicEul_size; i++) {
+        int v = dt->cicEul[i];
+        if (!seen[v]) {
+            dt->cicEul[write_idx++] = v;
+            seen[v] = 1;
+        }
+    }
+    dt->cicEul_size = write_idx;
+    free(seen);
+
+    // Add 0 at the end to close the cycle
+    if (dt->cicEul_size < MAX_CYCLE) {
+        dt->cicEul[dt->cicEul_size++] = 0;
+    }
+
+    // Compute sumPath
+    dt->sumPath = 0;
+    for (int i = 0; i < dt->cicEul_size - 1; i++) {
+        int u = dt->cicEul[i];
+        int v = dt->cicEul[i + 1];
+        dt->sumPath += dt->graph[u][v];
+    }
+}
+
+// Get the Eulerian cycle
+void getCycle(DoubleTree* dt) {
+    AlgPrima(dt);
+    Fleri(dt);
+}
+
+// Main function to get the cycle, equivalent to C++ getCycleDoubleTree
+int* getCycleDoubleTree(float** graph, int* n_) {
+    int n = *n_;
+    DoubleTree dt;
+    DoubleTree_init(&dt, graph, n);
+    getCycle(&dt);
+    int* cycle = (int*)malloc(dt.cicEul_size * sizeof(int));
+    memcpy(cycle, dt.cicEul, dt.cicEul_size * sizeof(int));
+    DoubleTree_destroy(&dt);
+    return cycle;
+}
+
 void tests(int v_min, int v_max, int n_tests)
 {
     Graph* g;

@@ -51,8 +51,7 @@
             "-g",
             "-o",
             "program",
-            "main.o",
-            "DoubleTree.o"
+            "main.o"
         ],
         "options": {
             "cwd": "${workspaceFolder}"
