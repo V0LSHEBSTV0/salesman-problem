@@ -3,6 +3,8 @@
 #include <ctype.h>
 #include <string.h>
 #include <stdbool.h>
+#include "DoubleTree.h"
+
 #include <time.h>
 #include <math.h>
 
@@ -325,7 +327,7 @@ int main() {
 
     // Graph* g_input = read_from_file(input_file);
 
-    // Graph* g = get_random_euclidean_graph(10);
+    Graph* g = get_random_euclidean_graph(10);
 
     // print_graph(g->G, g->N, g->N);
 
@@ -353,6 +355,16 @@ int main() {
     // printf("Путь: ");
     // print_cycle(path_eager, g->N);
     // printf("\n\n");
+
+    CDoubleTreeHandle dt = createDoubleTree(g->G, g->N);
+    callAlgPrima(dt);
+    callFleri(dt);
+
+    int* path_dabltree = getCycle(dt, &g->N);
+    printf("Алгоритм даблтрии.\nПуть: ");
+    print_cycle(path_dabltree, g->N);
+
+    printf("\nМинимальная дистанция: %d\n", getSum(dt));
 
     // // clean up
     // free(path_eager);
