@@ -3,17 +3,23 @@
 #include <ctype.h>
 #include <string.h>
 #include <stdbool.h>
-
+#include <time.h>
+#include <math.h>
 
 #define INF 1e9
 #define DOT 46 
 
-typedef int weight;
+typedef float weight;
 
 typedef struct Graph {
     int N;
     weight** G;
 } Graph;
+
+typedef struct Point {
+    weight x;
+    weight y;
+} Point; 
 
 weight get_num(FILE *fp){
     /*
@@ -33,7 +39,7 @@ weight get_num(FILE *fp){
     word[i] = '\0';
 
     weight num;         
-    sscanf(strdup(word), "%d", &num);
+    sscanf(strdup(word), "%f", &num);
 
     return num;
 }
@@ -78,7 +84,7 @@ Graph* read_from_file(char* file)
 void print_graph(weight** arr, int rows, int cols) {
     for (int i = 0; i < rows; i++) {
         for (int j = 0; j < cols; j++) {
-            printf("%d ", arr[i][j]);
+            printf("%f ", arr[i][j]);
         }
         printf("\n");
     }
@@ -89,7 +95,6 @@ bool is_euclidean_graph(Graph* g) {
         for (int j = 0; j < g->N; j++) {
             for (int k = 0; k < g->N; k++)
             {
-
                 if (g->G[i][j] > g->G[i][k] + g->G[j][k])
                 {
                     // printf("%d, %d, %d\n", i, j, k);
@@ -234,21 +239,69 @@ void print_cycle(int* path, int n)
     printf("%d -> %d", path[n-1], path[0]);
 }
 
-int main() {    
-    char input_file[] = "input.txt";
-    Graph* g = read_from_file(input_file);
+Point get_random_point(int x_max, int y_max)
+{
+    /* generates random point with coordinates between 0 and x/y_max */
+    int x = rand() % x_max;
+    int y = rand() % y_max;
+    Point p = {x, y};
+    return p;
+}
+
+weight distance_between_points(Point a, Point b)
+{
+    return sqrt(pow(a.x - b.x, 2) + pow(a.y - b.y, 2));
+}
+
+Graph* get_random_euclidean_graph(int n)
+{
+    Point* vertices = (Point*)malloc(n * sizeof(Point));
+    for (int i = 0; i < n; i++)
+    {
+        vertices[i] = get_random_point(100, 100);
+        printf("%f, %f", vertices[i].x, vertices[i].y);
+    }
+
+    weight** G = (weight**)malloc(n * sizeof(weight*));
+    for (int i = 0; i < n; i++)
+        G[i] = (weight*)malloc(n * sizeof(weight));
+
+    for (int i = 0; i < n; i++)
+        for (int j = 0; j < n; j++)
+            G[i][j] = distance_between_points(vertices[i], vertices[j]);
+
+    Graph* graph = (Graph*)malloc(sizeof(Graph));
+    graph->N = n;
+    graph->G = G;
+
+    free(vertices);
     
+    return graph;
+}
+
+int main() {
+    srand(time(NULL));    
+    char input_file[] = "input.txt";
+
+    Graph* g_input = read_from_file(input_file);
+
+    Graph* g = get_random_euclidean_graph(10);
+
     print_graph(g->G, g->N, g->N);
+
     if (!is_euclidean_graph(g))
     {
         printf("Граф не евклидов\n");
         return -1;
     }
+    else 
+        printf("Граф евклидов\n");
+        
 
     int* path_naive = naive_brute_force(g);
     weight dist_naive = sum_of_cycle(g, path_naive);
     printf("Полный перебор.\n");
-    printf("Минимальная дистанция: %d\n", dist_naive);
+    printf("Минимальная дистанция: %f\n", dist_naive);
     printf("Путь: ");
     print_cycle(path_naive, g->N);
     printf("\n\n");
@@ -257,7 +310,7 @@ int main() {
     int* path_eager = eager_tsp(g);
     weight dist_eager = sum_of_cycle(g, path_eager);
     printf("Жадный алгоритм.\n");
-    printf("Минимальная дистанция: %d\n", dist_eager);
+    printf("Минимальная дистанция: %f\n", dist_eager);
     printf("Путь: ");
     print_cycle(path_eager, g->N);
     printf("\n\n");
