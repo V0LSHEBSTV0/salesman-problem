@@ -200,7 +200,7 @@ public:
         cicEul.resize(write_idx);
     
         // Add 0 to close the cycle
-        cicEul.push_back(0);
+        cicEul.push_back(cicEul[0]);
     
         // Compute sumPath (corrected to use cicEul.size() - 1)
         sumPath = 0;
