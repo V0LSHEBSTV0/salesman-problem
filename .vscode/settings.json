@@ -48,6 +48,9 @@
         "typeinfo": "cpp",
         "ranges": "cpp",
         "span": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "doubletree.h": "c",
+        "graph_rand.h": "c",
+        "graph_tests.h": "c"
     }
 }

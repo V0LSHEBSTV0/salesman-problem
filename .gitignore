@@ -2,3 +2,8 @@ main
 main.o
 DoubleTree.o
 temp.json
+
+**.d
+**.o
+
+valgrind-out.txt

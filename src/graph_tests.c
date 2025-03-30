@@ -98,12 +98,10 @@ void tests(int v_min, int v_max, int v_max_bf, int n_tests, FILE* fp)
         dtree_number_of_best = 0;
 
         // cycle over number of tests
-        for (int i = 0; i < n_tests; i++ )
-        {
-            
+        for (int i = 0; i < n_tests; i++)
+        {            
             g = get_random_euclidean_graph(n);
             
-
             eager_res = time_of_c_algs_runtime(&eager_tsp, g);
             dtree_res = time_of_cpp_algs_runtime(&getCycleDoubleTree, g);
 
@@ -144,7 +142,6 @@ void tests(int v_min, int v_max, int v_max_bf, int n_tests, FILE* fp)
 
         eager_avg_distance[n-v_min] = eager_total_distance / (n_tests); 
         dtree_avg_distance[n-v_min] = dtree_total_distance / (n_tests); 
-
         
         fprintf(fp, "%d,%d,", n, n_tests);
         fprintf(fp, "%f,", bf_avg_time[n-v_min]);

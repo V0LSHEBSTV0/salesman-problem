@@ -1,1 +1,0 @@
-int* getCycleDoubleTree(float** graph, int* n);

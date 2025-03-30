@@ -10,9 +10,9 @@
                 "-fdiagnostics-color=always",
                 "-g",
                 "-c",
-                "DoubleTree.cpp",
+                "src/DoubleTree.cpp",
                 "-o",
-                "DoubleTree.o"
+                "src/DoubleTree.o"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
@@ -52,7 +52,7 @@
             "-o",
             "program",
             "main.o",
-            "DoubleTree.o"
+            "src/DoubleTree.o"
         ],
         "options": {
             "cwd": "${workspaceFolder}"

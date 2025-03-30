@@ -40,7 +40,7 @@ double_t sum_of_cycle(graph_t* g, int* vertices)
 
 double_t naive_brute_force(graph_t* g)
 {
-    int n = g->N;
+    int n = g->N;   
     int* vertices = (int*)malloc(g->N * sizeof(int));
 
     for (int i = 0; i < g->N; i++)
@@ -126,7 +126,7 @@ double_t eager_tsp(graph_t* g) {
     weight total_weight = 0;
 
     // Visit all vertices
-    for (int step = 1; step < N; step++) {
+    for (int step = 1; step < N; step++) { 
         int next = -1;
         weight min_weight = INF;  // INF is a large value (e.g., 1e9)
         // Find the nearest unvisited vertex
