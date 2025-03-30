@@ -24,10 +24,12 @@ public:
         ost = std::vector<std::vector<int>>(n, std::vector<int>(n, 0));
     }
     
-    void AlgPrima() {  // постройка остовного дерева, теперь O(N^2)
-        std::vector<int> U = { 0 };  // замена вектор индексов на флаги
+    void AlgPrima() {   // постройка остовного дерева теперь точно о(n^2)
+        std::vector<int> U = { 0 };
         std::vector<float> min(n, std::numeric_limits<float>::max());
         std::vector<int> par(n, -1);
+        std::vector<bool> inU(n, false); // замена вектор индексов на флаги
+        inU[0] = true;
     
         // инициализация мин. весов для стартовой вершины
         for (int i = 0; i < n; i++) {
@@ -37,30 +39,29 @@ public:
             }
         }
     
-        while (U.size() != n) {
+        for (int j = 1; j < n; j++) {
             float min_weight = std::numeric_limits<float>::max();
-            std::pair<int, int> imin = { -1, -1 }; // ребра не могут иметь отрицательные веса в евклидовом графе
-    
+            std::pair<int, int> imin = { -1, -1 };   // ребра не могут иметь отрицательные веса в евклидовом графе
     
     
             for (int i = 0; i < n; i++) {
-                if (std::find(U.begin(), U.end(), i) == U.end() && min[i] < min_weight) {
+                if (!inU[i] && min[i] < min_weight) { 
                     min_weight = min[i];
-                    imin = { par[i], i };
+                    imin = { par[i], i };  // запоминаем ребро
                 }
             }
     
-            if (imin.second == -1) break; // граф несвязный
+            if (imin.second == -1) break;  
     
-            
+            inU[imin.second] = true;
             U.push_back(imin.second);
-            ost[imin.first][imin.second] = 2;
-            ost[imin.second][imin.first] = 2; // дублирование остовного дерева
     
-            
+    
+            ost[imin.first][imin.second] = 2;
+            ost[imin.second][imin.first] = 2;  // дублирование остовного дерева
+    
             for (int i = 0; i < n; i++) {//восстановление
-                if (graph[imin.second][i] != 0.0 && graph[imin.second][i] < min[i] &&
-                    std::find(U.begin(), U.end(), i) == U.end()) {
+                if (graph[imin.second][i] != 0.0 && graph[imin.second][i] < min[i] && !inU[i]) {
                     min[i] = graph[imin.second][i];
                     par[i] = imin.second;
                 }
