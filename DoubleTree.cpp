@@ -68,24 +68,6 @@ public:
         }
     }
 
-    int findStart() {
-        int i = 0;
-
-        while(i < n) {
-            int step = 0;
-            for (int j = 0; j < n; j++) {
-                if (ost[i][j] != 0) {
-                    step += ost[i][j] != 0 ? 1 : 0;
-                }
-            }
-            if (step % 2 != 0) return i ;
-            i += 1;
-        }
-
-        return -1;
-    }
-
-
     void Fleri() {
         std::stack<int> st;
         int start = 0; // Start from vertex 0 (all degrees even in doubled MST)
