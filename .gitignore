@@ -7,3 +7,4 @@ temp.json
 **.o
 
 valgrind-out.txt
+analysis\
